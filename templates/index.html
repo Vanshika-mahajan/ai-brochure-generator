@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Brochure Generator</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:disabled { background-color: #aaa; }
+        #status { margin-top: 20px; font-weight: bold; }
+        #download-link a { color: #28a745; text-decoration: none; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <h1>AI Brochure Generator</h1>
+    <form id="brochure-form">
+        <input type="url" id="url-input" placeholder="Enter a company URL (e.g., https://www.google.com)" required>
+        <button type="submit" id="submit-button">Generate Brochure</button>
+    </form>
+    <div id="status"></div>
+    <div id="download-link"></div>
+
+    <script>
+        const form = document.getElementById('brochure-form');
+        const urlInput = document.getElementById('url-input');
+        const submitButton = document.getElementById('submit-button');
+        const statusDiv = document.getElementById('status');
+        const downloadDiv = document.getElementById('download-link');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            submitButton.disabled = true;
+            statusDiv.textContent = '🤖 Generating brochure... This might take a minute.';
+            downloadDiv.innerHTML = '';
+
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: urlInput.value })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    statusDiv.textContent = '✅ Brochure generated successfully!';
+                    downloadDiv.innerHTML = `<a href="${result.download_url}" download>Click here to download your PDF</a>`;
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                statusDiv.textContent = `❌ Error: ${error.message}`;
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
